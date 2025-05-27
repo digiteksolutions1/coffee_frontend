@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+th,
+td {
+  border: 1px solid black;
+  text-align: center;
+  padding: 10px; /* Normal padding */
+}
+th {
+  background-color: #f2f2f2;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+}
+
+.radio-button {
+  padding: 10px 20px;
+  border: 1px solid #000a14;
+  background-color: white;
+  color: #000000;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  font-weight: bold;
+}
+
+.radio-button:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+.radio-button.selected {
+  background-color: #007bff;
+  color: white;
+}
+
+@layer components {
+  .ProseMirror {
+    padding: 1rem;
+    /* or use Tailwind spacing like p-6 via this class */
+  }
+}
