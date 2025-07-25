@@ -42,7 +42,7 @@ const ClientEvaluation = ({ data, setData }) => {
     {
       key: "Is the client interested in the services or just time waste?",
       label: "Is the client interested in the services or just time waste?",
-      values: ["Time Consuming", "Cann't say for sure", "Interested"],
+      values: ["Time Consuming", "Can't say for sure", "Interested"],
     },
   ];
 

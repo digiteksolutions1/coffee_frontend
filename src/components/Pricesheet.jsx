@@ -13,7 +13,7 @@ const Logout = () => {
     console.log("Logging out...");
     try {
       const response = await axios.post(
-        `https://nice-bohr.212-227-199-118.plesk.page/api/v1/logout`,
+        `${import.meta.env.VITE_SERVER_URL}/api/v1/logout`,
         {},
         { withCredentials: true }
       );

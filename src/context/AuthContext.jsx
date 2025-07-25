@@ -2,6 +2,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { getToken, setToken, removeToken } from "../utils/auth";
+import axios from "axios";
 
 const AuthContext = createContext();
 
@@ -13,13 +14,26 @@ export const AuthProvider = ({ children }) => {
     initializeAuth();
   }, []);
 
-  const initializeAuth = () => {
+  const initializeAuth = async () => {
     const token = getToken();
     if (token) {
       try {
-        const decoded = jwtDecode(token);
-        setUser(decoded);
-        setIsAuthenticated(true);
+        const requestConfig = {
+          headers: {
+            authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        };
+        const response = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/api/v1/authVerify`,
+          requestConfig
+        );
+        console.log(response);
+        if (response.status == 200) {
+          setIsAuthenticated(true);
+          setUser(response?.data?.data);
+        }
       } catch (error) {
         logout();
         console.log(error);

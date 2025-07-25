@@ -9,7 +9,7 @@ import colors from "../../utils/colors";
 export default function LoginScreen() {
   const navigate = useNavigate();
   const { isAuthenticated, user, login } = useAuth();
-  // const base_url = import.meta.env.VITE_BASE_URL;
+  const base_url = import.meta.env.VITE_SERVER_URL;
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +28,7 @@ export default function LoginScreen() {
     // Handle login logic here
     try {
       const response = await axios.post(
-        `https://nice-bohr.212-227-199-118.plesk.page/api/v1/login`,
+        `${base_url}/api/v1/login`,
         {
           email: email,
           password: password,

@@ -5,6 +5,7 @@ import { Navigate } from "react-router";
 import { Coffee, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
 import Logout from "../../components/Logout";
 import ExpandableClientForm from "../../components/ExpandClientForm";
+import ClearForm from "../../components/ClearForm";
 
 export default function Dashboard() {
   const [notes, setNotes] = useState(Array(135).fill("").join("\n"));
@@ -12,6 +13,9 @@ export default function Dashboard() {
 
   const toggleNotes = () => {
     setIsNotesExpanded(!isNotesExpanded);
+  };
+  const resetNotes = () => {
+    setNotes(Array(135).fill("").join("\n"));
   };
   return (
     <div
@@ -33,14 +37,13 @@ export default function Dashboard() {
           </h1>
         </div>
         <div className="flex items-center">
-          <h1></h1>
           <Logout />
         </div>
       </header>
       <div className="flex flex-1 relative">
         {/* Main content area with expandable client form */}
         <main className="flex-1 p-6">
-          <ExpandableClientForm sideNotes={notes} />
+          <ExpandableClientForm sideNotes={notes} notesReset={resetNotes} />
         </main>
 
         {/* Notes toggle button */}

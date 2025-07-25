@@ -17,10 +17,12 @@ import toast, { Toaster } from "react-hot-toast";
 import ClientEvaluation from "./ClientEvaluation";
 import { Navigate, useNavigate } from "react-router";
 import { getToken } from "../utils/auth";
+import ClearForm from "./ClearForm";
+import { defaultFormValues } from "./Formvalues";
 
-export default function ExpandableClientForm({ sideNotes }) {
+export default function ExpandableClientForm({ sideNotes, notesReset }) {
   const navigate = useNavigate();
-  // const base_url = import.meta.env.VITE_BASE_URL;
+  const base_url = import.meta.env.VITE_SERVER_URL;
   const [dropdownData, setDropdownData] = useState({}); // Store the array prices
   const [assetDataOption, setAssetDataOption] = useState([]);
   const [bookkeepingOption, setBookkeeepingOption] = useState([]);
@@ -38,106 +40,17 @@ export default function ExpandableClientForm({ sideNotes }) {
     .filter((line) => line != "")
     .join("\n");
 
-  const [formData, setFormData] = useState({
-    //Client Details
-    clientName: "",
-    tradingName: "",
-    phoneNumber: "",
-    email: "",
-    businessType: "",
-    onboardingfee: "",
-    //Accounting
-    accountingSection: true,
-    salesRange: "",
-    salesPrice: 0,
-    isCustomSalesPrice: false,
-    customSalesPrice: 0,
-    //Bookkeeping
-    bookkeepingSection: true,
-    transactionsPerMonth: "",
-    transactionsPrice: 0,
-    isCustomBookkeepingPrice: false,
-    customBookkeepingPrice: 0,
-    //VAT Returns
-    VATSection: true,
-    range: "",
-    rangePrice: 0,
-    frequency: "",
-    frequencyOffset: 0,
-    VATScheme: "",
-    totalVATPrice: 0,
-    isCustomVATPrice: false,
-    customVATPrice: 0,
-    //Asset Register
-    AssetSection: true,
-    fixedAssets: "",
-    assetsPrice: 0,
-    isCustomAssetPrice: false,
-    customAssetPrice: 0,
-    //Payroll
-    payrollSection: true,
-    employeeCount: "",
-    payrollPrice: 0,
-    payrollFrequency: "",
-    employementAllowance: "",
-    isCustomPayrollPrice: false,
-    customPayrollPrice: null,
-    //Pension
-    pensionSection: true,
-    pensionEmployeeCount: "",
-    pensionPrice: 0,
-    isCustomPensionPrice: false,
-    customPensionPrice: 0,
-    //CIS Registration
-    CISSection: true,
-    contractorsCount: "",
-    contractorsPrice: 0,
-    reportingFrequency: "",
-    offset: 0,
-    totalCISPrice: 0,
-    isCustomCISPrice: false,
-    customCISPrice: "",
-    //Multicurrency
-    multiCurrencySection: true,
-    currencyPrice: 0,
-    isCustomCurrencyPrice: false,
-    customCurrencyPrice: 0,
-    //Custom1
-    custom1Section: false,
-    custom1Name: "",
-    custom1Description: "",
-    custom1Price: 0,
-    //Custom2
-    custom2Section: false,
-    custom2Name: "",
-    custom2Description: "",
-    custom2Price: 0,
-    //Addiional Notes
+  const [formData, setFormData] = useState(defaultFormValues);
 
-    //Contract
-    startDate: "",
-
-    //Risk Scorecard
-    industry: "",
-    riskScoreData: {},
-    riskType: "",
-
-    //INFO related EMAIL
-    incorporation: false,
-    mettle_freeAgent: false,
-    virtualAddress: false,
-    trustPilot: false,
-    pandlePRO: false,
-
-    //Data & added by
-    contractDate: "",
-    addedBy: "Rita",
-  });
-  console.log(formData);
+  const clearForm = () => {
+    setFormData(defaultFormValues);
+    notesReset();
+    setQuoteShow(false);
+  };
 
   useEffect(() => {
     axios
-      .get(`https://nice-bohr.212-227-199-118.plesk.page/api/v1/getPrice`)
+      .get(`${base_url}/api/v1/getPrice`)
       .then((res) => {
         setDropdownData(res.data.data);
         console.log(res.data);
@@ -217,6 +130,23 @@ export default function ExpandableClientForm({ sideNotes }) {
         "Checked",
         checked
       );
+      if (name == "isDiscount") {
+        setFormData((p) => ({
+          ...p,
+          [name]: checked,
+          isSpecialDiscount: false,
+        }));
+        return;
+      }
+      if (name == "isSpecialDiscount") {
+        setFormData((p) => ({
+          ...p,
+          [name]: checked,
+          isDiscount: false,
+          discountValue: "",
+        }));
+        return;
+      }
       if (
         type == "button" &&
         formData.riskScoreData.client &&
@@ -350,7 +280,7 @@ export default function ExpandableClientForm({ sideNotes }) {
   const handleSubmit = async (e) => {
     try {
       const response = await axios.post(
-        `https://nice-bohr.212-227-199-118.plesk.page/api/v1/formData`,
+        `${base_url}/api/v1/formData`,
         {
           formData: formData,
           clientEvaluation: clientEvaluation,
@@ -373,6 +303,33 @@ export default function ExpandableClientForm({ sideNotes }) {
   };
 
   //Clients
+  const howtofind = {
+    id: "howToFind",
+    label: "How did you find us?",
+    type: "text",
+    value: formData.howToFind,
+    onChangeFunction: handleChange,
+    placeholder: "",
+    isCustom: true,
+  };
+  const otherbusiness = {
+    id: "otherBusinesses",
+    label: "Do you have any other businesses?",
+    type: "text",
+    value: formData.otherBusinesses,
+    onChangeFunction: handleChange,
+    placeholder: "",
+    isCustom: true,
+  };
+  const ispassion = {
+    id: "isPassion",
+    label: "Is this your passion or a side hobby?",
+    type: "text",
+    value: formData.isPassion,
+    onChangeFunction: handleChange,
+    placeholder: "",
+    isCustom: true,
+  };
   const clientName = {
     id: "clientName",
     label: "Client Name",
@@ -388,7 +345,7 @@ export default function ExpandableClientForm({ sideNotes }) {
     type: "text",
     value: formData.tradingName,
     onChangeFunction: handleChange,
-    placeholder: "Enter Trading Name",
+    placeholder: "Trading Name (Registration number 9999999)",
     isCustom: true,
   };
   const phoneNo = {
@@ -803,6 +760,17 @@ export default function ExpandableClientForm({ sideNotes }) {
     classes: "",
   };
 
+  //Discount
+  const discountValue = {
+    id: "discountValue",
+    label: "Discount Percentage(%)",
+    type: "number",
+    value: formData.discountValue,
+    onChangeFunction: handleChange,
+    placeholder: "Enter Discount Percentage(%)",
+    isCustom: formData.isDiscount,
+  };
+
   return (
     <>
       <Toaster />
@@ -908,9 +876,9 @@ export default function ExpandableClientForm({ sideNotes }) {
             </div>
             <div>
               <Checkbox
-                label={"Mettle & Free Agent"}
-                name="mettle_freeAgent"
-                checked={formData.mettle_freeAgent}
+                label={"Free Agent"}
+                name="freeAgent"
+                checked={formData.freeAgent}
                 onChange={handleChange}
               />
             </div>
@@ -938,6 +906,14 @@ export default function ExpandableClientForm({ sideNotes }) {
                 onChange={handleChange}
               />
             </div>
+            <div>
+              <Checkbox
+                label={"Ecommerce Integrations (FA,Xero,QB)"}
+                name="ecommerceIntegration"
+                checked={formData.ecommerceIntegration}
+                onChange={handleChange}
+              />
+            </div>
             <div className="ml-10 text-xl font-semibold ">
               Price: {t_Price.toFixed(2)}
             </div>
@@ -948,6 +924,9 @@ export default function ExpandableClientForm({ sideNotes }) {
           {/* Basic Information Section - Open by default */}
           <ExpandableSection title="Client Details" isOpenByDefault={true}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <InputField data={howtofind} />
+              <InputField data={otherbusiness} />
+              <InputField data={ispassion} />
               <InputField data={clientName} />
               <InputField data={tradingName} />
               <InputField data={phoneNo} />
@@ -1081,9 +1060,9 @@ export default function ExpandableClientForm({ sideNotes }) {
             </div>
           </ExpandableSection>
 
-          {/* CIS Registration Section */}
+          {/* CIS Reporting Section */}
           <ExpandableSection
-            title="CIS Registration"
+            title="CIS Reporting"
             isOpenByDefault={formData.CISSection}
             name="CISSection"
             onChange={handleChange}
@@ -1169,7 +1148,7 @@ export default function ExpandableClientForm({ sideNotes }) {
               />
             </div>
           </ExpandableSection>
-          {/* Riskcard Section */}
+          {/* Client Evaluation Section */}
           <ExpandableSection title="Client Evaluation" isOpenByDefault={true}>
             <div>
               <ClientEvaluation
@@ -1178,18 +1157,40 @@ export default function ExpandableClientForm({ sideNotes }) {
               />
             </div>
           </ExpandableSection>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-5 ml-3 mb-10">
-            <InputFieldCSS data={dateField} />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-5 ml-3 mb-10 items-center">
+            {/* <InputFieldCSS data={dateField} /> */}
             <InputFieldCSS data={addedBy} />
+            <div className="mt-5 ml-10">
+              <Checkbox
+                label={
+                  "Special Discount (100% OFF for 1st Month & 50% Off for 2nd & 3rd Month"
+                }
+                name="isSpecialDiscount"
+                checked={formData.isSpecialDiscount}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="mt-5 ml-10">
+              <Checkbox
+                label={"Discount Applies For first 3 months"}
+                name="isDiscount"
+                checked={formData.isDiscount}
+                onChange={handleChange}
+              />
+            </div>
+
+            <InputField data={discountValue} />
           </div>
         </form>
         <div className="flex justify-center">
+          <ClearForm onClickFunction={clearForm} />
           <button
+            className="flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-100 transform hover:scale-105 active:scale-95 shadow-lg mr-5 cursor-pointer"
             onClick={() => {
               setQuoteShow(!quoteShow);
               console.log(formData);
             }}
-            className={`flex items-center font-medium py-2 px-4 rounded-lg transition duration-400 ease-in-out active:scale-[0.98] cursor-pointer`}
+            // className={`flex items-center font-medium py-2 px-4 rounded-lg transition duration-400 ease-in-out active:scale-[0.98] cursor-pointer`}
             style={{ backgroundColor: colors.primary, color: "white" }}
           >
             Generate Quote

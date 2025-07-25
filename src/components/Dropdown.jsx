@@ -22,7 +22,7 @@ const Dropdown = (props) => {
           name={props.data.id}
           value={props.data.value}
           onChange={props.data.onChangeFunction}
-          className="w-full px-4 py-2 rounded-lg outline-none transition-all duration-200 appearance-none"
+          className="w-full px-4 py-2 rounded-lg outline-none transition-all duration-200 appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500"
           style={{
             ...inputStyle,
             backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%231E90FF'%3E%3Cpath strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,

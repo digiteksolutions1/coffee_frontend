@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import colors from "../utils/colors";
 import InputField from "./InputField";
+import { industries } from "./Formvalues";
+import AutoCompleteInput from "./Autocomplete";
 
 const RiskSelector = ({
   id,
@@ -70,8 +72,16 @@ const RiskSelector = ({
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-        <InputField data={industry} />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+        <AutoCompleteInput
+          suggestions={industries}
+          id={industry.id}
+          label={industry.label}
+          value={industry.value}
+          onChangeFunction={industry.onChangeFunction}
+          placeholder={industry.placeholder}
+          isCustom={industry.isCustom}
+        />
       </div>
       <table className="w-full mt-5 border border-collapse text-center cursor-pointer">
         <thead className="border border-collapse bg-gray-100">
@@ -116,12 +126,11 @@ const RiskSelector = ({
         </div>
 
         {options.map((option) => (
-          <div className="place-items-stretch">
+          <div className="place-items-stretch" key={option}>
             <button
               type="button"
               name="riskType"
               id={id}
-              key={option}
               value={option}
               onClick={onChangeFunction}
               className={`

@@ -9,7 +9,7 @@ import axios from "axios";
 import { getToken } from "../utils/auth";
 
 const RichTextEditor = ({ show, form, totalPrice, notes, evaluate }) => {
-  // const base_url = import.meta.env.VITE_BASE_URL;
+  const base_url = import.meta.env.VITE_SERVER_URL;
   const token = getToken();
   const scrollRef = useRef(null);
 
@@ -33,32 +33,34 @@ const RichTextEditor = ({ show, form, totalPrice, notes, evaluate }) => {
   });
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Notes: ", notes);
-    console.log("Evaluate: ", evaluate);
-    console.log("Total Price: ", totalPrice);
-    console.log("Form ", form);
+
+    const payload = {
+      formData: form,
+      clientEvaluation: evaluate,
+      cleanedNotes: notes,
+      t_Price: totalPrice,
+    };
+
+    const requestConfig = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      withCredentials: true,
+    };
+
     try {
-      const response = await axios.post(
-        `https://nice-bohr.212-227-199-118.plesk.page/api/v1/formData`,
+      await toast.promise(
+        axios.post(`${base_url}/api/v1/formData`, payload, requestConfig),
         {
-          formData: form,
-          clientEvaluation: evaluate,
-          cleanedNotes: notes,
-          t_Price: totalPrice,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        },
-        { withCredentials: true }
+          loading: "Saving quote...",
+          success: "Quote and Additional Info saved successfully",
+          error: (err) =>
+            err?.response?.data?.message || "Something went wrong!",
+        }
       );
-      console.log(response);
-      toast.success("Data Send Successfully");
     } catch (error) {
-      toast.error(error?.response?.data?.message);
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -92,10 +94,9 @@ const RichTextEditor = ({ show, form, totalPrice, notes, evaluate }) => {
       Company is usually registered within 24 hours and will usually be set up for Corporation Tax at the same time. <br/><br/>`;
       }
 
-      if (form.mettle_freeAgent) {
-        numberedContent += `<strong>[${step++}] Mettle & FreeAgent </strong><br/>You can open business bank account with Mettle (by Natwest) for your business and you will get access to FreeAgent (accounting software) for free.
-      You can read more about Mettle here - <a href="https://www.mettle.co.uk">https://www.mettle.co.uk</a> 
-      FreeAgent software is here - <a href="https://www.freeagent.com/en/">https://www.freeagent.com/en/</a><br/><br/>`;
+      if (form.freeAgent) {
+        numberedContent += `<strong>[${step++}] FreeAgent </strong><br/>You will get access to FreeAgent (accounting software) for free.
+      You can read more about FreeAgent here - <a href="https://www.freeagent.com/en/">https://www.freeagent.com/en/</a><br/><br/>`;
       }
 
       if (form.virtualAddress) {
@@ -113,7 +114,7 @@ const RichTextEditor = ({ show, form, totalPrice, notes, evaluate }) => {
         <div>
         Hey ${form.clientName},<br/><br/>
         I hope you are well.<br/><br/>
-        It was great to catch up with you. As per our conversation, please see the information regarding ${
+        It was great to communicate with you. As per our conversation, please see the information regarding ${
           form.tradingName
         }
         <br/><br/>
@@ -122,51 +123,77 @@ const RichTextEditor = ({ show, form, totalPrice, notes, evaluate }) => {
          <strong>[1] Monthly services</strong><br/><br/> 
 
 
-  The quote is based on your provided information - <strong>£${totalPrice.toFixed(
+  The quote based on your provided information is - <strong>£${totalPrice.toFixed(
     2
-  )} + VAT 20%</strong><br/>
-  (50% will be off for the first 3 Months)<br/><br/>
-
-Services Offered in the quoted price:
+  )}+VAT per month ${
+        form.isDiscount || form.isSpecialDiscount ? "**" : ""
+      }</strong><br/>
+  ${
+    form.isDiscount
+      ? `(**Discount Applies - ${
+          form.discountValue
+        }% off for the first 3 months i.e. £${(
+          totalPrice -
+          (form.discountValue / 100) * totalPrice
+        ).toFixed(2)}+VAT per month)`
+      : ``
+  }
+  ${
+    form.isSpecialDiscount
+      ? `(**Discount Applies - 100% off for the first month i.e. <strong>£0</strong> and 50% off for the second and third Months <strong>£${(
+          totalPrice -
+          totalPrice / 2
+        ).toFixed(2)}</strong>+VAT per month)`
+      : ``
+  }
+  
+<br/><br/>
+Services offered in the quoted price:
 <br/>
 ${
-  form.accountingSection
+  form.accountingSection &&
+  (form.businessType == "ST" || form.businessType == "")
     ? `<strong>Accounting</strong> - This includes accounting advice, Statutory Accounts completion (for businesses ${form.salesRange}/year);<br/>`
     : ``
 }
 ${
+  form.accountingSection && form.businessType == "LTD"
+    ? `<strong>Accounting</strong> - This includes accounting advice, Statutory Accounts completion and submission to HMRC & Companies House (for businesses ${form.salesRange}/year);<br/>`
+    : ``
+}
+${
   form.bookkeepingSection
-    ? `<strong>Bookkeeping</strong> - Reviewing and reconciling ${form.transactionsPerMonth} transactions per month;<br/>`
+    ? `<strong>Bookkeeping</strong> - Reviewing and reconciling ${form.transactionsPerMonth} transactions per month (average);<br/>`
     : ``
 }
 ${
   form.VATSection
-    ? `<strong>VAT Returns</strong> - This includes VAT Returns ${form.range} per ${form.frequency};<br/>`
+    ? `<strong>VAT Returns</strong> - ${form.frequency} preparation of the report and submission in line with MTD requirements (${form.range} transactions per month);<br/>`
     : ``
 }
 ${
   form.AssetSection
-    ? `<strong>Asset Register</strong> - This includes asset registration of ${form.fixedAssets} assets;<br/>`
+    ? `<strong>Asset Register</strong> - Recording and maintaining a register of ${form.fixedAssets} business assets, including tracking depreciation and accurate reporting;<br/>`
     : ``
 }
 ${
   form.payrollSection
-    ? `<strong>Payroll</strong> - This includes running payroll for ${form.employeeCount}  employee(s);<br/>`
+    ? `<strong>Payroll</strong> - Running compliant ${form.payrollFrequency} payroll for ${form.employeeCount} employee(s), including payslip generation, tax calculation, and HMRC submissions;<br/>`
     : ``
 }
 ${
   form.pensionSection
-    ? `<strong>Pension</strong> - This includes handle pension for ${form.pensionEmployeeCount} employee(s);<br/>`
+    ? `<strong>Pension</strong> - Managing pension contributions for ${form.pensionEmployeeCount} employee(s), ensuring timely submissions and compliance with workplace pension regulations;<br/>`
     : ``
 }
 ${
   form.CISSection
-    ? `<strong>CIS</strong> - This includes CIS Registration of ${form.contractorsCount} contractors per ${form.reportingFrequency};<br/>`
+    ? `<strong>CIS</strong> - ${form.reportingFrequency} CIS registration and verification for up to ${form.contractorsCount} contractor(s), including preparations and filling of CIS returns;<br/>`
     : ``
 }
 ${
   form.multiCurrencySection
-    ? `<strong>Multi-currency</strong> - This includes transactions in multiple currencies;<br/>`
+    ? `<strong>Multi-currency</strong> - Recording and reconciling transactions across multiple currencies, ensuring accurate foreign exchange treatment and reporting;<br/>`
     : ``
 }
 ${
@@ -189,6 +216,16 @@ ${
 <br/>
   Any additional work required which is not covered by the ‘Services Offered’ will be agreed upon with you and charged at an hourly rate of <strong>£33.00 + VAT</strong> or a set fee (Historic work, Registration for or deregistration from VAT/PAYE/CIS/Pension and other taxes, Training, Dealing with queries on your behalf (incl. calls to HMRC), Director Self Assessment, Confirmation Statement, Additional reporting, etc.)
 <br/><br/>
+${
+  form.ecommerceIntegration
+    ? `For an additional fee the alternative accounting software options to consider that supports direct eCommerce integrations:<br/>
+- FreeAgent (<a href="https://www.freeagent.com/pricing/" target="_blank">https://www.freeagent.com/pricing/</a>)<br/>
+- Xero (<a href="https://www.xero.com/uk/pricing-plans/" target="_blank">https://www.xero.com/uk/pricing-plans/</a>)<br/>
+- QuickBooks (<a href="https://quickbooks.intuit.com/uk/pricing/" target="_blank">https://quickbooks.intuit.com/uk/pricing/</a>)<br/><br/>`
+    : ``
+}
+
+
 <strong>[2] Onboarding fee </strong><br/>
 
 There is a one-off set-up fee of <strong>${
@@ -208,7 +245,7 @@ Rita Krekovska ACMA CGMA MiP<br />
 Digital Accountant <br/><br/>
 
   E: <a href="mailto:info@digital-accountant.co.uk">info@digital-accountant.co.uk</a><br />
-  P: 07757307576<br />
+  P: 01604289777<br />
   W: <a href="https://www.digital-accountant.co.uk" target="_blank">www.digital-accountant.co.uk</a><br />
   YT: <a href="https://www.youtube.com/c/DigitalAccountant" target="_blank">https://www.youtube.com/c/DigitalAccountant</a>
 </div>
@@ -252,7 +289,7 @@ Digital Accountant <br/><br/>
         <div>
           <button
             onClick={handleSubmit}
-            className={`flex items-center font-medium py-2 px-4 rounded-lg transition duration-400 ease-in-out active:scale-[0.98] cursor-pointer`}
+            className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-100 transform hover:scale-105 active:scale-95 shadow-lg mr-5 cursor-pointer`}
             style={{ backgroundColor: colors.primary, color: "white" }}
           >
             Save Quote & Generate Contract

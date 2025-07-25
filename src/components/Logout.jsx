@@ -13,7 +13,7 @@ const Logout = () => {
     console.log("Logging out...");
     try {
       const response = await axios.post(
-        `https://nice-bohr.212-227-199-118.plesk.page/api/v1/logout`,
+        `${import.meta.env.VITE_SERVER_URL}/api/v1/logout`,
         {},
         { withCredentials: true }
       );
@@ -30,7 +30,7 @@ const Logout = () => {
       <Toaster />
       <button
         onClick={handleLogout}
-        className={`flex items-center font-medium py-2 px-4 rounded-lg transition duration-400 ease-in-out active:scale-[0.98] cursor-pointer`}
+        className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-100 transform hover:scale-105 active:scale-95 shadow-lg cursor-pointer`}
         style={{ backgroundColor: colors.primary, color: "white" }}
       >
         <LogOut

@@ -23,7 +23,7 @@ const DatePickerFieldCSS = (props) => {
         type="date"
         value={props.data.value}
         onChange={props.data.onChangeFunction}
-        className="w-full px-4 py-2 rounded-lg outline-none transition-all duration-200"
+        className="w-full px-4 py-2 rounded-lg outline-none transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
         style={inputStyle}
         placeholder={props.data.placeholder}
       />
